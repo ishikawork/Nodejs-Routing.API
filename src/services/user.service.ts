@@ -4,8 +4,14 @@ import { HttpException } from '@exceptions/HttpException';
 import { isEmpty } from '@utils/util';
 import User from '@models/users.model';
 import { v4 as uuidv4 } from 'uuid';
+import { injectable } from 'inversify';
+import 'reflect-metadata';
+import { IUserService } from './interfaces/user.interface';
 
-class UserService {
+@injectable()
+export default class UserService implements IUserService {
+  constructor() { }
+  
   public async findAllUser(): Promise<any> {
     return User.find();
   }
@@ -45,5 +51,3 @@ class UserService {
     return User.removeById(userId);
   }
 }
-
-export default UserService;

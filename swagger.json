@@ -1,0 +1,478 @@
+{
+    "basePath": "/",
+    "info": { "title": "Fhynix", "version": "1.0" },
+    "paths": {
+      "/users/me": {
+        "get": {
+          "security": [{ "Bearer": [] }],
+          "operationId": "getUsers",
+          "tags": ["user"],
+          "description": "Get users objects list",
+          "summary": "Get users list",
+          "responses": {
+            "200": {
+              "description": "Success",
+              "schema": { "$ref": "#/definitions/getUser" }
+            },
+            "400": { "description": "Client error and Bad Request" },
+            "500": { "description": "Internal Server Error" }
+          },
+          "produces": ["application/json"],
+          "consumes": ["application/json"]
+        },
+        "put": {
+          "security": [{ "Bearer": [] }],
+          "operationId": "user",
+          "tags": ["user"],
+          "description": "Update user details",
+          "summary": "Update user details",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Update using family member id",
+              "required": false,
+              "schema": {
+                "$ref": "#/definitions/UserDto"
+              }
+            },
+            {
+              "in": "query",
+              "name": "memberId",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success",
+              "schema": { "$ref": "#/definitions/user" }
+            },
+            "400": { "description": "Client error and Bad Request" },
+            "500": { "description": "Internal Server Error" }
+          },
+          "produces": ["application/json"],
+          "consumes": ["application/json"]
+        }
+      },
+      "/auth/login": {
+        "post": {
+          "operationId": "login",
+          "tags": ["login"],
+          "description": "Login through auth code",
+          "summary": "Get access token",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Login through auth code",
+              "required": false,
+              "schema": {
+                "$ref": "#/definitions/LoginDto"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success",
+              "schema": { "$ref": "#/definitions/login" }
+            },
+            "400": { "description": "Client error and Bad Request" },
+            "500": { "description": "Internal Server Error" }
+          },
+          "security": [{ "apiKeyHeader": [] }],
+          "produces": ["application/json"],
+          "consumes": ["application/json"]
+        }
+      },
+      "/activities": {
+        "get": {
+          "security": [{ "Bearer": [] }],
+          "operationId": "getActivities",
+          "tags": ["activities"],
+          "description": "Get activities by relationship",
+          "summary": "Get activities list",
+          "parameters": [
+            {
+              "in": "query",
+              "name": "relationship",
+              "schema": {
+                "type": "string",
+                "enum": ["self", "parent", "kid", "other"]
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success",
+              "schema": { "$ref": "#/definitions/Activities" }
+            },
+            "400": { "description": "Client error and Bad Request" },
+            "500": { "description": "Internal Server Error" }
+          },
+          "produces": ["application/json"],
+          "consumes": ["application/json"]
+        },
+        "post": {
+          "security": [{ "Bearer": [] }],
+          "operationId": "family-member-activities",
+          "tags": ["family-member-activities"],
+          "description": "add family member activities",
+          "summary": "add family member activities",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "add activity at member level",
+              "required": false,
+              "schema": {
+                "$ref": "#/definitions/FamilyMemberActivitiesDto"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success",
+              "schema": { "$ref": "#/definitions/FamilyMemberActivities" }
+            },
+            "400": { "description": "Client error and Bad Request" },
+            "500": { "description": "Internal Server Error" }
+          },
+          "produces": ["application/json"],
+          "consumes": ["application/json"]
+        }
+      },
+      "/family-members": {
+        "get": {
+          "security": [{ "Bearer": [] }],
+          "operationId": "getFamilyMembers",
+          "tags": ["family-members"],
+          "description": "Get family members list",
+          "summary": "Get family members list",
+          "responses": {
+            "200": {
+              "description": "Success",
+              "schema": { "$ref": "#/definitions/user" }
+            },
+            "400": { "description": "Client error and Bad Request" },
+            "500": { "description": "Internal Server Error" }
+          },
+          "produces": ["application/json"],
+          "consumes": ["application/json"]
+        },
+        "post": {
+          "security": [{ "Bearer": [] }],
+          "operationId": "family-member",
+          "tags": ["family-member"],
+          "description": "add family member details",
+          "summary": "add family member details",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Update using family member id",
+              "required": false,
+              "schema": {
+                "$ref": "#/definitions/FamilyMemberDto"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success",
+              "schema": { "$ref": "#/definitions/user" }
+            },
+            "400": { "description": "Client error and Bad Request" },
+            "500": { "description": "Internal Server Error" }
+          },
+          "produces": ["application/json"],
+          "consumes": ["application/json"]
+        }
+      },
+      "/relationships": {
+        "get": {
+          "security": [{ "Bearer": [] }],
+          "operationId": "getRelationships",
+          "tags": ["relationships"],
+          "description": "Get relationships",
+          "summary": "Get relationship list",
+          "responses": {
+            "200": {
+              "description": "Success",
+              "schema": { "$ref": "#/definitions/relationships" }
+            },
+            "400": { "description": "Client error and Bad Request" },
+            "500": { "description": "Internal Server Error" }
+          },
+          "produces": ["application/json"],
+          "consumes": ["application/json"]
+        }
+      }
+    },
+    "tags": [{ "name": "getUser" }],
+    "schemes": ["https", "http"],
+    "produces": ["application/json"],
+    "consumes": ["application/json"],
+    "definitions": {
+      "getUser": {
+        "required": ["accessToken"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "uniqueItems": true
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "isOnboardingCompleted": {
+            "type": "boolean"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "relationshipId": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "dob": {
+            "type": "date"
+          },
+          "profileImage": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "otherInfo": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "personalities": {
+            "type": "string"
+          },
+          "interests": {
+            "type": "string"
+          }
+        }
+      },
+      "login": {
+        "required": ["authCode", "provider"],
+        "properties": {
+          "authToken": {
+            "type": "string"
+          }
+        }
+      },
+      "user": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "relationshipId": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "dob": {
+            "type": "date"
+          },
+          "profileImage": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "otherInfo": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "personalities": {
+            "type": "string"
+          },
+          "interests": {
+            "type": "string"
+          }
+        }
+      },
+      "activities": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "appliesForRelation": {
+            "type": "string"
+          },
+          "isVisible": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FamilyMemberActivities": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "familyMemberId": {
+            "type": "string"
+          },
+          "activityId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "appliesForRelation": {
+            "type": "string"
+          }
+        }
+      },
+      "FamilyMemberActivitiesDto": {
+        "type": "object",
+        "properties": {
+          "familyMemberId": {
+            "type": "string"
+          },
+          "activityId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "appliesForRelation": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "authCode": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          }
+        }
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "relationshipId": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "dob": {
+            "type": "date"
+          },
+          "profileImage": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "otherInfo": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "personalities": {
+            "type": "string"
+          },
+          "interests": {
+            "type": "string"
+          }
+        }
+      },
+      "FamilyMemberDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "relationshipId": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "dob": {
+            "type": "date"
+          },
+          "profileImage": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "otherInfo": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "personalities": {
+            "type": "string"
+          },
+          "interests": {
+            "type": "string"
+          }
+        }
+      },
+      "relationships": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "relationType": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securityDefinitions": {
+      "Bearer": {
+        "name": "Authorization",
+        "in": "header",
+        "type": "apiKey",
+        "description": "JWT Authorization header"
+      }
+    },
+    "swagger": "2.0"
+  }
+  

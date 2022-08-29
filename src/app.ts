@@ -13,6 +13,10 @@ import swaggerUi from 'swagger-ui-express';
 import { NODE_ENV, PORT, LOG_FORMAT, ORIGIN, CREDENTIALS } from '@config';
 import errorMiddleware from '@middlewares/error.middleware';
 import { logger, stream } from '@utils/logger';
+import { InversifyExpressServer } from 'inversify-express-utils';
+import { diContainer } from './config/inversify.config'
+import * as bodyParser from 'body-parser'
+import swaggerDocument from '../swagger.json'
 
 class App {
   public app: express.Application;
@@ -21,17 +25,29 @@ class App {
 
   constructor(Controllers: Function[]) {
     this.app = express();
+
     this.env = NODE_ENV || 'development';
     this.port = PORT || 3000;
 
     this.initializeMiddlewares();
     this.initializeRoutes(Controllers);
-    this.initializeSwagger(Controllers);
+    // this.initializeSwagger(Controllers);
     this.initializeErrorHandling();
   }
 
   public listen() {
-    this.app.listen(this.port, () => {
+    let server =  new InversifyExpressServer(diContainer, null, { rootPath: "/" }, this.app);
+    server.setConfig((app) => {
+      app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+      app.use(
+        bodyParser.urlencoded({
+          extended: true,
+        }),
+      )
+      app.use(bodyParser.json())
+    })
+    let appConfigured = server.build();
+    appConfigured.listen(process.env.PORT || 3000, () =>{
       logger.info(`=================================`);
       logger.info(`======= ENV: ${this.env} =======`);
       logger.info(`🚀 App listening on the port ${this.port}`);

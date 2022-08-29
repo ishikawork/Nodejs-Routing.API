@@ -1,12 +1,12 @@
 import App from '@/app';
-import { ottoman } from './config/ottoman-config';
+import { ottoman } from './config/ottoman.config';
 import { IndexController } from '@controllers/index.controller';
-import { UsersController } from '@controllers/users.controller';
+import { UserController } from '@/controllers/user.controller';
 import validateEnv from '@utils/validateEnv';
 
 validateEnv();
 
-const app = new App([IndexController, UsersController]);
+const app = new App([IndexController, UserController]);
 
 const main = async () => {
   try {
