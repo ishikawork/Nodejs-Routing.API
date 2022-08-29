@@ -7,10 +7,17 @@ import 'reflect-metadata';
 import { IUserService } from '@/services/interfaces/user.interface';
 import { TYPES } from '@/config/types';
 import { controller, httpDelete, httpGet, httpPost, httpPut, interfaces } from 'inversify-express-utils';
+import {
+  ApiOperationGet,
+  ApiOperationPatch,
+  ApiOperationPost,
+  ApiPath
+} from '@inversify-cn/swagger-express-ts';
 
 @controller("/api")
 export class UserController implements interfaces.Controller {
   private _userService: IUserService;
+  public static TARGET_NAME = 'UserControllerName';
 
   constructor(@inject(TYPES.UserService) userService: IUserService) {
     this._userService = userService;
@@ -30,7 +37,7 @@ export class UserController implements interfaces.Controller {
     return { data: findOneUserData, message: 'findOne' };
   }
 
-  @httpPost('/users')
+  @httpPost('/')
   @HttpCode(201)
   @UseBefore(validationMiddleware(CreateUserDto, 'body'))
   @OpenAPI({ summary: 'Create a new user' })
@@ -39,7 +46,7 @@ export class UserController implements interfaces.Controller {
     return { data: createUserData, message: 'created' };
   }
 
-  @httpPut('/users/:id')
+  @httpPut('/:id')
   @UseBefore(validationMiddleware(UpdateUserDto, 'body', true))
   @OpenAPI({ summary: 'Update a user' })
   async updateUser(@Param('id') userId: string, @Body() userData: UpdateUserDto) {
@@ -47,7 +54,7 @@ export class UserController implements interfaces.Controller {
     return { data: updateUserData, message: 'updated' };
   }
 
-  @httpDelete('/users/:id')
+  @httpDelete('/:id')
   @OpenAPI({ summary: 'Delete a user' })
   async deleteUser(@Param('id') userId: string) {
     const deleteUserData = await this._userService.deleteUser(userId);

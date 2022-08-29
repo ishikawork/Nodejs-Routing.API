@@ -1,118 +1,90 @@
 import 'reflect-metadata';
-import { MetadataStorage } from 'class-transformer/cjs';
-import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import morgan from 'morgan';
-import { useExpressServer, getMetadataArgsStorage } from 'routing-controllers';
-import { routingControllersToSpec } from 'routing-controllers-openapi';
-import swaggerUi from 'swagger-ui-express';
-import { NODE_ENV, PORT, LOG_FORMAT, ORIGIN, CREDENTIALS } from '@config';
+import { NODE_ENV, PORT, LOG_FORMAT } from '@config';
 import errorMiddleware from '@middlewares/error.middleware';
 import { logger, stream } from '@utils/logger';
 import { InversifyExpressServer } from 'inversify-express-utils';
-import { diContainer } from './config/inversify.config'
-import * as bodyParser from 'body-parser'
-import swaggerDocument from '../swagger.json'
+import { diContainer, Container } from './config/inversify.config'
+import * as swagger from '@inversify-cn/swagger-express-ts';
 
 class App {
+  public container: Container;
+  public server: InversifyExpressServer;
   public app: express.Application;
   public env: string;
   public port: string | number;
 
-  constructor(Controllers: Function[]) {
-    this.app = express();
-
+  constructor() {
     this.env = NODE_ENV || 'development';
-    this.port = PORT || 3000;
-
-    this.initializeMiddlewares();
-    this.initializeRoutes(Controllers);
-    // this.initializeSwagger(Controllers);
-    this.initializeErrorHandling();
-  }
-
-  public listen() {
-    let server =  new InversifyExpressServer(diContainer, null, { rootPath: "/" }, this.app);
-    server.setConfig((app) => {
-      app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-      app.use(
-        bodyParser.urlencoded({
-          extended: true,
-        }),
-      )
-      app.use(bodyParser.json())
-    })
-    let appConfigured = server.build();
-    appConfigured.listen(process.env.PORT || 3000, () =>{
-      logger.info(`=================================`);
-      logger.info(`======= ENV: ${this.env} =======`);
-      logger.info(`🚀 App listening on the port ${this.port}`);
-      logger.info(`=================================`);
+    this.port = PORT || 4000;
+    
+    this.container = diContainer;
+    this.server =  new InversifyExpressServer(diContainer, null, { rootPath: "/api" }, this.app);
+    this.server.setConfig((app: express.Application) => {
+      this.initializeMiddlewares(app);
+    });
+    this.server.setErrorConfig((app: express.Application) => {
+      this.initializeErrorHandling(app);
+    });
+    this.app = this.server.build();
+    this.app.listen(this.port, () => {
+      console.log(
+        `⚡️[server]: Server is running at https://localhost:${this.port}`
+      );
     });
   }
 
-  public getServer() {
-    return this.app;
+  // public listen() {
+  //   this.app.listen(process.env.PORT || 3000, () =>{
+  //     logger.info(`=================================`);
+  //     logger.info(`======= ENV: ${this.env} =======`);
+  //     logger.info(`🚀 App listening on the port ${this.port}`);
+  //     logger.info(`=================================`);
+  //   });
+  // }
+
+  private initializeMiddlewares(app: express.Application) {
+    this.initializeSwagger(app);
+    app.use(morgan(LOG_FORMAT, { stream }));
+    app.use(hpp());
+    app.use(helmet());
+    app.use(compression());
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(cookieParser());
   }
 
-  private initializeMiddlewares() {
-    this.app.use(morgan(LOG_FORMAT, { stream }));
-    this.app.use(hpp());
-    this.app.use(helmet());
-    this.app.use(compression());
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(cookieParser());
-  }
-
-  private initializeRoutes(controllers: Function[]) {
-    useExpressServer(this.app, {
-      cors: {
-        origin: ORIGIN,
-        credentials: CREDENTIALS,
-      },
-      controllers: controllers,
-      defaultErrorHandler: false,
-    });
-  }
-
-  private initializeSwagger(controllers: Function[]) {
-    const schemas = validationMetadatasToSchemas({
-      classTransformerMetadataStorage: MetadataStorage,
-      refPointerPrefix: '#/components/schemas/',
-    });
-
-    const routingControllersOptions = {
-      controllers: controllers,
-    };
-
-    const storage = getMetadataArgsStorage();
-    const spec = routingControllersToSpec(storage, routingControllersOptions, {
-      components: {
-        schemas,
-        securitySchemes: {
-          basicAuth: {
-            scheme: 'basic',
-            type: 'http',
+  private initializeSwagger(app: express.Application): void {
+    app.use('/api-docs/swagger', express.static('swagger'));
+    app.use(
+      '/api-docs/swagger/assets',
+      express.static('node_modules/swagger-ui-dist')
+    );
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(
+      swagger.express({
+        definition: {
+          info: {
+            title: 'My api',
+            version: '1.0'
           },
-        },
-      },
-      info: {
-        description: 'Generated with `routing-controllers-openapi`',
-        title: 'A sample API',
-        version: '1.0.0',
-      },
-    });
-
-    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
+          externalDocs: {
+            url: 'My url'
+          }
+          // Models can be defined here
+        }
+      })
+    );
   }
 
-  private initializeErrorHandling() {
-    this.app.use(errorMiddleware);
+  private initializeErrorHandling(app: express.Application) {
+    app.use(errorMiddleware);
   }
 }
 
